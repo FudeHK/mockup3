@@ -35,8 +35,22 @@ const EMOJI=/[\p{Extended_Pictographic}️⃣]/u;
     if(!t.c.includes('show')||t.t!=='モックアップのため操作できません')bad.push([mode,w,r,'toast',t])}
    if(n<5)bad.push([mode,'few-dummy',n]);
    // 広報フロー（リンクで1→4）
-   await p.goto(base+'#/promo/1');for(let i=1;i<4;i++){await p.click('a.btn.block.big');await p.waitForTimeout(30)}
-   if(!p.url().endsWith('promo/4'))bad.push([mode,w,'promo-flow',p.url()]);
+   await p.goto(base+'#/promo/1');for(let i=1;i<6;i++){await p.click('a.btn.block.big');await p.waitForTimeout(30)}
+   if(!p.url().endsWith('promo/6'))bad.push([mode,w,'promo-flow',p.url()]);
+   // 広報サポートの各機能
+   const T=async(r)=>{await p.goto(base+'#/'+r);await p.waitForTimeout(30);return p.evaluate(()=>document.body.innerText)};
+   let t=await T('promo/1');
+   if((await p.$$('[data-act="photo"]')).length!==3||!t.includes('AIは料理そのものを作り替えません。写真は必ず実物を使います')||!t.includes('7 / 20案')||!t.includes('プレミアムプランで使えます'))bad.push([mode,w,'promo1-feature']);
+   t=await T('promo/2');if((await p.$$('[data-k="bg"]')).length!==4||!t.includes('AI生成の背景'))bad.push([mode,w,'promo2-bg']);
+   await T('promo/3');await p.fill('[data-f="copy"]','日本一うまい');
+   if(!(await p.innerText('#w-copy')).includes('景品表示法'))bad.push([mode,w,'warn-copy']);
+   await p.fill('[data-f="copy"]','旬のお刺身');await p.fill('[data-f="shop"]','テスト食堂');
+   if(!(await p.innerHTML('#pv')).includes('テスト食堂')||(await p.innerText('#w-copy')).trim())bad.push([mode,w,'preview-live']);
+   if((await p.$$('[data-k="size"]')).length!==3)bad.push([mode,w,'sizes']);
+   for(const [k,vb] of [['st','0 0 200 356'],['mp','0 0 240 135'],['sq','0 0 200 200']]){await p.click('[data-k="size"][data-v="'+k+'"]');if(!(await p.innerHTML('#pv')).includes('viewBox="'+vb+'"'))bad.push([mode,w,'size',k])}
+   t=await T('promo/5');if((await p.$$('[data-act="ppost"]')).length!==3||!t.includes('#'))bad.push([mode,w,'posts']);
+   await p.fill('textarea[data-chk]','絶対おいしい');if(!(await p.innerText('#w-post')).includes('景品表示法'))bad.push([mode,w,'warn-post']);
+   t=await T('promo/guide');if(!t.includes('指導カード'))bad.push([mode,w,'guide']);
    await p.close();
   }
  }

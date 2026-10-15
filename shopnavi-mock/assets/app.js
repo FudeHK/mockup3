@@ -65,8 +65,9 @@ var DQ=[
 var CHECK={open:['看板・のれんを出す','手洗い・消毒','冷蔵庫の温度確認','おしぼり・箸の補充','レジ釣り銭の確認'],close:['火元・ガス栓の確認','床・トイレ清掃','まな板・包丁の消毒','売上の締め','施錠']};
 var ONB=['制服・身だしなみを確認','店内案内と動線を覚える','お客様への挨拶を練習','オーダーの取り方を覚える','配膳の基本を覚える','レジ操作の見学','アレルギー対応の説明を受ける'];
 var PO={type:['定食屋','居酒屋','レストラン','カフェ'],mood:['和風','洋風','シンプル','にぎやか'],use:['新メニュー','お知らせ','日替わり']};
-var PAL={'和風':['#f3e7d3','#8c2f2b','#3b2a1d'],'洋風':['#1f2d4a','#c9a24b','#ffffff'],'シンプル':['#ffffff','#555555','#222222'],'にぎやか':['#ffe08a','#e8743b','#4a2a10']};
-var PT={'新メニュー':'新メニュー登場','お知らせ':'お知らせ','日替わり':'本日の日替わり'};
+var PAL={'和風':'#8c2f2b','洋風':'#1f2d4a','シンプル':'#555555','にぎやか':'#b9501f'};
+var BG={'和風':{c:'#f3e7d3',ink:'#3b2a1d'},'カフェ風':{c:'#ead9c3',ink:'#3e2c20'},'居酒屋風':{c:'#3a2518',ink:'#fff2dc'},'シンプル':{c:'#ffffff',ink:'#222222'}};
+var SIZES={sq:['Instagram投稿','正方形 1:1',200,200],st:['ストーリーズ','縦長 9:16',200,356],mp:['Googleマップ用','横長 16:9',240,135]};
 /* ===== ナビ構成 ===== */
 var NAV=FULL?[['home','ホーム'],['manual','マニュアル'],['menu','メニュー設定'],['kitchen','厨房ビュー'],['diag','スタッフ診断'],['staff','スタッフ'],['promo','広報'],['request','運営への要望'],['settings','設定']]
  :[['home','ホーム'],['manual','マニュアル'],['kitchen','厨房ビュー'],['staff','スタッフ']];
@@ -77,7 +78,7 @@ if(FULL){['diag','staff','promo','request','settings','onboarding','checklist','
 /* ===== util ===== */
 var $=function(s){return document.querySelector(s)};
 var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
-var state={wiz:{step:1,tpl:0},dq:{i:0,ans:[]},fs:'m',promo:{type:'居酒屋',mood:'和風',use:'新メニュー',pick:0}};
+var state={wiz:{step:1,tpl:0},dq:{i:0,ans:[]},fs:'m',promo:{type:'居酒屋',mood:'和風',use:'新メニュー',bg:'和風',photo:0,shop:SHOP.name,copy:'旬の刺身、入荷しました',hours:'17:00〜24:00',closed:'毎週水曜日',size:'sq',pick:0,post:0}};
 var toastT;
 function toast(){var t=$('#toast');t.textContent='モックアップのため操作できません';t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show')},2200)}
 var D=function(label,cls){return '<button class="btn '+(cls||'')+'" data-dummy>'+label+'</button>'};
@@ -89,13 +90,38 @@ function graph(a){var w=300,h=110,p=14,xs=(w-2*p)/(a.length-1),pts=a.map(functio
 function st(id){return STAFF.filter(function(s){return s.id==id})[0]}
 function pill(s){return '<span class="tag">'+TYPES[s.t].n+'</span>'}
 function lcard(h,i,t,sub){return '<a class="card link-card" href="#/'+h+'"><div class="ico">'+ic(i)+'</div><div class="grow"><b>'+t+'</b>'+(sub?'<br>'+sub:'')+'</div></a>'}
-/* ===== 広報画像（SVGプレースホルダー） ===== */
-function cand(i,p){var c=PAL[p.mood],bg=c[0],mc=c[1],ink=c[2],title=PT[p.use],shop=SHOP.name,s='<svg viewBox="0 0 200 200" role="img" aria-label="広報画像のサンプル表示 案'+'ABC'.charAt(i)+'"><defs><pattern id="h'+i+'" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="'+mc+'" stroke-opacity=".25" stroke-width="3"/></pattern></defs>';
- var T='font-family="Hiragino Sans,Noto Sans JP,Yu Gothic,Meiryo,sans-serif" font-weight="700" text-anchor="middle"';
- if(i==0){s+='<rect width="200" height="200" fill="'+bg+'"/><rect x="20" y="20" width="160" height="110" rx="6" fill="url(#h'+i+')" stroke="'+mc+'" stroke-width="2"/><text x="100" y="80" '+T+' font-size="12" fill="'+mc+'">料理写真の枠</text><text x="100" y="162" '+T+' font-size="20" fill="'+ink+'">'+title+'</text><text x="100" y="184" '+T+' font-size="11" fill="'+ink+'">'+shop+'</text>'}
- if(i==1){s+='<rect width="200" height="200" fill="'+bg+'"/><rect width="200" height="124" fill="url(#h'+i+')"/><text x="100" y="66" '+T+' font-size="12" fill="'+mc+'">料理写真の枠</text><rect y="124" width="200" height="76" fill="'+mc+'"/><text x="100" y="158" '+T+' font-size="20" fill="'+bg+'">'+title+'</text><text x="100" y="180" '+T+' font-size="11" fill="'+bg+'">'+shop+'</text>'}
- if(i==2){s+='<rect width="200" height="200" fill="'+mc+'"/><rect x="10" y="10" width="180" height="180" rx="8" fill="none" stroke="'+bg+'" stroke-width="2"/><rect x="24" y="24" width="152" height="120" rx="60" fill="url(#h'+i+')" stroke="'+bg+'" stroke-width="2"/><text x="100" y="88" '+T+' font-size="12" fill="'+bg+'">料理写真の枠</text><text x="100" y="166" '+T+' font-size="19" fill="'+bg+'">'+title+'</text><text x="100" y="184" '+T+' font-size="10" fill="'+bg+'">'+shop+'</text>'}
- return s+'<text x="190" y="14" text-anchor="end" font-size="9" font-family="sans-serif" fill="#999">SAMPLE</text></svg>'}
+/* ===== 広報画像（SVGプレースホルダー／文字はテンプレートに流し込む） ===== */
+var uid=0;
+var FONT='font-family="Hiragino Sans,Noto Sans JP,Yu Gothic,Meiryo,sans-serif" font-weight="700" text-anchor="middle"';
+function photoSvg(n,x,y,w,h,r){var id='c'+(uid++),cols=['#d9b48a','#c98a4b','#9c5a3a'],food=[
+ '<rect x="38" y="40" width="14" height="8" rx="3" fill="#e8737a"/><rect x="54" y="38" width="14" height="8" rx="3" fill="#f2a0a0"/><rect x="70" y="42" width="14" height="8" rx="3" fill="#e8737a"/><rect x="46" y="50" width="30" height="5" rx="2" fill="#f4f0e6"/>',
+ '<circle cx="48" cy="44" r="8" fill="#e0a040"/><circle cx="64" cy="42" r="9" fill="#d18f2f"/><circle cx="58" cy="54" r="8" fill="#e0a040"/><circle cx="74" cy="52" r="7" fill="#d18f2f"/>',
+ '<rect x="36" y="42" width="48" height="3" rx="1.5" fill="#8a5a2f"/><rect x="36" y="50" width="48" height="3" rx="1.5" fill="#8a5a2f"/><rect x="42" y="40" width="9" height="7" rx="3" fill="#b8642f"/><rect x="58" y="40" width="9" height="7" rx="3" fill="#b8642f"/><rect x="42" y="48" width="9" height="7" rx="3" fill="#b8642f"/><rect x="58" y="48" width="9" height="7" rx="3" fill="#b8642f"/>'];
+ return '<clipPath id="'+id+'"><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+(r||0)+'"/></clipPath><g clip-path="url(#'+id+')"><svg x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice"><rect width="120" height="90" fill="'+cols[n]+'"/><ellipse cx="60" cy="47" rx="36" ry="28" fill="#fff"/><ellipse cx="60" cy="47" rx="30" ry="22" fill="#f7efe3"/>'+food[n]+'<text x="60" y="84" text-anchor="middle" font-size="6" fill="#fff" font-family="sans-serif">実物写真（サンプル）</text></svg></g>'}
+function bgSvg(name,W,H){var id='bp'+(uid++),c=BG[name].c,pat='';
+ if(name=='和風'){var k='<circle cx="X" cy="12" r="10" fill="none" stroke="#d9c4a0" stroke-width="1.2"/>';pat='<pattern id="'+id+'" width="24" height="12" patternUnits="userSpaceOnUse">'+k.replace('X','12')+k.replace('X','0')+k.replace('X','24')+'</pattern>'}
+ if(name=='カフェ風')pat='<pattern id="'+id+'" width="20" height="16" patternUnits="userSpaceOnUse"><line x1="0" y1="15" x2="20" y2="15" stroke="#d6bd9a" stroke-width="1.5"/></pattern>';
+ if(name=='居酒屋風')pat='<pattern id="'+id+'" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="15" cy="15" r="6" fill="#d9822b" fill-opacity=".35"/><circle cx="15" cy="15" r="2.5" fill="#ffd27a" fill-opacity=".7"/></pattern>';
+ if(name=='シンプル')return '<rect width="'+W+'" height="'+H+'" fill="#fff"/><rect x="3" y="3" width="'+(W-6)+'" height="'+(H-6)+'" fill="none" stroke="#e5ddd3" stroke-width="1.5"/>';
+ return '<defs>'+pat+'</defs><rect width="'+W+'" height="'+H+'" fill="'+c+'"/><rect width="'+W+'" height="'+H+'" fill="url(#'+id+')"/>'}
+function textBlock(p,tx,fill){var cp=p.copy||'',h=Math.ceil(cp.length/2),L=cp.length>10?[cp.slice(0,h),cp.slice(h)]:[cp],w=tx[2],cx=tx[0]+w/2,
+ mx=Math.max.apply(null,L.map(function(s){return s.length||1})),fc=Math.max(7,Math.min(19,w*.9/mx)),fs=Math.min(11,w*.9/Math.max(1,p.shop.length)),
+ f2=Math.min(8.5,w*.9/(Math.max(p.hours.length+3,p.closed.length+4)*.72)),f0=Math.min(8,w*.9/Math.max(1,p.use.length)),it=[[p.use,f0,3]];
+ L.forEach(function(s,i){it.push([s,fc,i==L.length-1?6:1])});it.push([p.shop,fs,4],['営業 '+p.hours,f2,1],['定休日 '+p.closed,f2,0]);
+ var need=0;it.forEach(function(x){need+=x[1]*1.25+x[2]});var s=Math.min(1,tx[3]/need),y=tx[1]+(tx[3]-need*s)/2,o='';
+ it.forEach(function(x){var z=x[1]*s;o+='<text x="'+cx.toFixed(1)+'" y="'+(y+z).toFixed(1)+'" '+FONT+' font-size="'+z.toFixed(1)+'" fill="'+fill+'">'+esc(x[0])+'</text>';y+=(x[1]*1.25+x[2])*s});return o}
+function cand(i,p){var S=SIZES[p.size]||SIZES.sq,W=S[2],H=S[3],wide=W>H,tall=H>W*1.5,bg=BG[p.bg]||BG['和風'],acc=PAL[p.mood],ph,tx,pn=null,fr='',fill=bg.ink,ph2;
+ if(i==0){ph=wide?[10,10,W*.5,H-20,6]:[16,16,W-32,tall?200:112,6];tx=wide?[W*.5+16,10,W*.5-26,H-20]:[0,ph[1]+ph[3]+8,W,H-ph[1]-ph[3]-16];fr='<rect x="'+ph[0]+'" y="'+ph[1]+'" width="'+ph[2]+'" height="'+ph[3]+'" rx="6" fill="none" stroke="'+acc+'" stroke-width="2.5"/>'}
+ if(i==1){fill='#fff';if(wide){ph=[0,0,W*.55,H,0];pn=[W*.55,0,W*.45,H,0];tx=[W*.55+6,6,W*.45-12,H-12]}else{ph2=tall?230:120;ph=[0,0,W,ph2,0];pn=[0,ph2,W,H-ph2,0];tx=[6,ph2+4,W-12,H-ph2-8]}}
+ if(i==2){fill='#fff';if(wide){ph=[16,16,W*.46,H-32,12];pn=[W*.46+24,16,W-W*.46-40,H-32,10]}else{ph=[20,20,W-40,tall?190:104,12];pn=[20,ph[1]+ph[3]+8,W-40,H-ph[1]-ph[3]-28,10]}tx=[pn[0]+4,pn[1]+4,pn[2]-8,pn[3]-8];fr='<rect x="5" y="5" width="'+(W-10)+'" height="'+(H-10)+'" rx="8" fill="none" stroke="'+acc+'" stroke-width="2.5"/>'}
+ return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="広報画像のサンプル表示（'+S[0]+'）">'+bgSvg(p.bg,W,H)+(pn?'<rect x="'+pn[0]+'" y="'+pn[1]+'" width="'+pn[2]+'" height="'+pn[3]+'" rx="'+pn[4]+'" fill="'+acc+'"/>':'')+photoSvg(p.photo,ph[0],ph[1],ph[2],ph[3],ph[4])+fr+textBlock(p,tx,fill)+'<rect x="'+(W-40)+'" y="'+(H-13)+'" width="37" height="10" rx="3" fill="#000" fill-opacity=".5"/><text x="'+(W-21.5)+'" y="'+(H-5.5)+'" text-anchor="middle" font-size="6.5" font-family="sans-serif" fill="#fff">SAMPLE</text></svg>'}
+/* 表現チェック（景品表示法への配慮） */
+var BAN=['日本一','世界一','絶対','最安','最高','No.1','ナンバーワン','業界初','必ず','完全','地域一番','一番'];
+function hits(t){return BAN.filter(function(w){return (t||'').indexOf(w)>=0})}
+function warnHtml(t){var h=hits(t);return h.length?'<div class="warn" role="alert"><b>表現にご注意ください：'+h.map(esc).join('、')+'</b><br>根拠を示せない「日本一」「絶対」「最安」などの言い切りは、景品表示法（優良誤認・有利誤認）に触れるおそれがあります。「当店調べ」など根拠のある表現に言い換えるか、削除してください。<br><small>参考表示です。最終判断は必ずご自身で行ってください。</small></div>':''}
+function plans(p){return [['案A（ていねい）','【'+p.use+'】'+p.shop+'より。'+p.copy+'。営業時間は'+p.hours+'、定休日は'+p.closed+'です。ご来店をお待ちしております。'],['案B（親しみやすい）',p.copy+'！ '+p.shop+'で、あなたをお待ちしています。仕事帰りにふらっとどうぞ。（'+p.hours+'）'],['案C（短め）',p.copy+'。'+p.shop+'（'+p.hours+' ／ 定休日 '+p.closed+'）']]}
+function tagsFor(p){var m={'定食屋':['#定食','#ランチ','#日替わり定食'],'居酒屋':['#居酒屋','#飲み会','#仕事帰り'],'レストラン':['#ディナー','#ランチ','#記念日'],'カフェ':['#カフェ','#コーヒー','#おうちじかん']};return ['#'+p.shop.replace(/\s/g,'')].concat(m[p.type]).concat(['#地元グルメ','#新メニュー'])}
+function usageCard(){return '<div class="card usage"><div class="row between wrap"><b>今月の作成数</b><span><b>7 / 20案</b></span></div><div class="bar" style="margin:6px 0"><i style="width:35%"></i></div><span class="tag y">プレミアムプランで使えます</span></div>'}
 /* ===== views ===== */
 var V={};
 V.home=function(){
@@ -176,16 +202,25 @@ V.checklist=function(){function l(a){return a.map(function(x){return '<button cl
  return back('home','ホーム')+head('衛生・開店閉店チェック','タップで完了表示（保存されません）')+'<h2>開店前</h2>'+l(CHECK.open)+'<h2>閉店後</h2>'+l(CHECK.close)};
 V.lang=function(){return back('home','ホーム')+head('多言語切替','外国人スタッフ向け（表示のみ）')+'<div class="card"><div class="chips">'+LANGS.map(function(x,i){return '<span class="opt '+(i==0?'on':'')+'" data-pick>'+x+'</span>'}).join('')+'</div></div><div class="card"><h3>表示サンプル</h3><p>開店準備：<b>おしぼりを　ならべます</b></p><p class="lead">※実際の翻訳は動きません</p></div>'+D('この言語で表示','block')};
 V.quiz=function(){return back('home','ホーム')+head('今日のひとこと','')+'<div class="card"><p style="font-size:1.1rem">'+WORDS[1]+'</p></div><h2>ミニクイズ</h2>'+QUIZ.map(function(q,qi){return '<div class="card"><b>Q'+(qi+1)+'. '+q.q+'</b><div style="margin-top:10px">'+q.o.map(function(o,i){return '<button class="opt" data-act="quiz" data-ok="'+(i==q.a?1:0)+'">'+o+'</button>'}).join('')+'</div></div>'}).join('')};
-/* 広報画像づくり（4ステップ） */
-V.promo=function(n){n=+n||1;if(n<1||n>4)return null;var p=state.promo,body='';
+/* 広報画像づくり（6ステップ＋使い方カード） */
+var PSTEP=['写真を選ぶ','テイストと背景','文字とサイズ','候補から選ぶ','投稿文を選ぶ','保存・書き出し'];
+function promoGuide(){var st=[['写真を選ぶ','お店の実物の料理写真を選びます。'],['テイストと背景','店のタイプ・雰囲気・用途と、AI生成の背景を選びます。'],['文字とサイズ','店名・一言コピー・営業時間・定休日を入力。投稿先に合わせてサイズを選びます。'],['候補から選ぶ','3つの型（レイアウト）から1つ選びます。'],['投稿文を選ぶ','3案から選ぶだけ。ハッシュタグ候補つきです。'],['保存・書き出し','内容を確認して、保存または投稿用に書き出します。']];
+ return back('promo/1','広報画像をつくる')+'<div class="paper"><div class="paper-h">広報サポート　かんたん指導カード</div><p class="lead" style="margin:6px 0 12px">'+SHOP.name+' ／ スタッフ用（印刷してレジ横に貼る想定）</p><ol class="paper-ol">'+st.map(function(x){return '<li><b>'+x[0]+'</b><br>'+x[1]+'</li>'}).join('')+'</ol>'+
+ '<div class="paper-box"><b>守ること</b><ul><li>料理そのものはAIで生成しません。実際の写真を加工します。</li><li>AIの出力は参考案です。必ず内容を確認してから使用してください。</li><li>「日本一」「絶対」「最安」などの言い切りは使わない（景品表示法への配慮）。</li><li>文字はAIでなく、テンプレートに流し込んで整えます。</li></ul></div><p style="margin:10px 0 0"><small>今月の作成数 7 / 20案 ／ プレミアムプランで使えます</small></p></div><div style="max-width:560px;margin:14px auto 0">'+D('印刷する','block ghost')+'</div>'}
+V.promo=function(n){if(n==='guide')return promoGuide();n=+n||1;if(n<1||n>6)return null;var p=state.promo,body='',S=SIZES[p.size];
  var notes='<div class="alert">料理そのものはAIで生成しません。実際の写真を加工します。</div><div class="alert">AIの出力は参考案です。必ず内容を確認してから使用してください。</div>';
- if(n==1)body='<h2>写真を選ぶ</h2><div class="thumb" style="aspect-ratio:16/10">'+ic('image')+'料理写真の枠（ダミー）</div><p class="lead" style="margin-top:10px">実物の料理写真を使います。</p><div class="row" style="margin-bottom:6px">'+D('写真を撮る','grow')+D('写真を選ぶ','grow ghost')+'</div>';
+ if(n==1)body='<h2>写真を選ぶ</h2><div class="alert" style="background:#e3f1e7"><b>AIは料理そのものを作り替えません。写真は必ず実物を使います。</b></div><p class="lead">お店の実物の料理写真を選びます（下はサンプル写真です）。</p><div class="g3">'+[['刺身'],['唐揚げ'],['焼き鳥']].map(function(x,i){return '<button class="cand '+(p.photo==i?'on':'')+'" data-act="photo" data-v="'+i+'"><svg viewBox="0 0 120 90">'+photoSvg(i,0,0,120,90,0)+'</svg><div class="cap"><b>写真'+(i+1)+'</b><small>'+x[0]+'</small></div></button>'}).join('')+'</div><div class="row" style="margin:14px 0 6px">'+D('写真を撮る','grow')+D('写真を選ぶ','grow ghost')+'</div><p><a class="back" href="#/promo/guide">広報の使い方カードを見る</a></p>';
  if(n==2){function grp(k,l){return '<label class="f">'+l+'</label><div class="chips">'+PO[k].map(function(x){return '<button class="opt '+(p[k]==x?'on':'')+'" data-act="pset" data-k="'+k+'" data-v="'+x+'">'+x+'</button>'}).join('')+'</div>'}
-  body='<h2>テイストを選ぶ</h2>'+grp('type','店のタイプ')+grp('mood','雰囲気')+grp('use','用途')}
- if(n==3)body='<h2>候補から選ぶ</h2><div class="alert">サンプル表示です。実際の画像ではなく、色と枠だけの見本です。文字はアプリ側で重ねる想定です。</div><div class="grid c3">'+[0,1,2].map(function(i){return '<button class="cand '+(p.pick==i?'on':'')+'" data-act="ppick" data-v="'+i+'">'+cand(i,p)+'<div class="cap"><b>案'+'ABC'.charAt(i)+'</b><span class="tag">サンプル表示</span></div></button>'}).join('')+'</div>';
- if(n==4)body='<h2>保存・書き出し</h2><div class="card" style="max-width:340px;margin-left:auto;margin-right:auto;padding:8px">'+cand(p.pick,p)+'<div class="cap" style="padding:8px"><b>案'+'ABC'.charAt(p.pick)+'</b> <span class="tag">サンプル表示</span></div></div><p class="lead" style="text-align:center">'+p.type+' ／ '+p.mood+' ／ '+p.use+'</p><div class="grid c2">'+D('保存','big')+D('投稿用に書き出す','big ghost')+'</div>';
- return back(n>1?'promo/'+(n-1):'home',n>1?'前のステップ':'ホーム')+head('広報画像をつくる','ステップ '+n+' / 4')+'<div class="steps">'+[1,2,3,4].map(function(i){return '<i class="'+(i<=n?'on':'')+'"></i>'}).join('')+'</div>'+notes+body+
- (n<4?'<a class="btn block big" style="margin-top:16px" href="#/promo/'+(n+1)+'">次へ</a>':'')};
+  body='<h2>テイストと背景を選ぶ</h2>'+grp('type','店のタイプ')+grp('mood','雰囲気')+grp('use','用途')+'<label class="f">背景（AIが背景だけを作ります）</label><div class="g2">'+Object.keys(BG).map(function(k){return '<button class="cand '+(p.bg==k?'on':'')+'" data-act="pset" data-k="bg" data-v="'+k+'"><svg viewBox="0 0 120 90">'+bgSvg(k,120,90)+'</svg><div class="cap"><b>'+k+'</b><span class="tag s">AI生成の背景</span></div></button>'}).join('')+'</div>'}
+ if(n==3){function fld(l,k,m){return '<label class="f">'+l+'</label><input type="text" data-f="'+k+'"'+(k=='copy'?' data-chk':'')+' maxlength="'+m+'" value="'+esc(p[k])+'">'}
+  body='<h2>文字とサイズ</h2><p class="lead">文字はAIでなく、決まったテンプレート（型）に流し込んで整えます。</p>'+fld('店名','shop',20)+fld('一言コピー','copy',24)+'<div id="w-copy">'+warnHtml(p.copy)+'</div><p class="lead" style="margin:4px 0 0"><small>例：「日本一」「絶対」「最安」などを入れると警告が出ます</small></p>'+fld('営業時間','hours',20)+fld('定休日','closed',16)+
+  '<label class="f">用途別のサイズ</label><div class="chips">'+Object.keys(SIZES).map(function(k){return '<button class="opt '+(p.size==k?'on':'')+'" data-act="pset" data-k="size" data-v="'+k+'">'+'<span style="display:block">'+SIZES[k][0]+'</span><small>'+SIZES[k][1]+'</small></button>'}).join('')+'</div><h3 style="margin-top:16px">プレビュー</h3><div class="card pv" id="pv">'+cand(0,p)+'</div>'}
+ if(n==4)body='<h2>候補から選ぶ</h2><div class="alert">サンプル表示です。実際の画像ではなく、背景と写真の枠だけの見本です。文字はアプリ側で重ねる想定です。</div><p class="lead">'+S[0]+'（'+S[1]+'）</p><div class="grid c3">'+['枠型','帯型','額縁型'].map(function(nm,i){return '<button class="cand '+(p.pick==i?'on':'')+'" data-act="ppick" data-v="'+i+'">'+cand(i,p)+'<div class="cap"><b>案'+'ABC'.charAt(i)+'（'+nm+'）</b><span class="tag">サンプル表示</span></div></button>'}).join('')+'</div>';
+ if(n==5){var pl=plans(p),tg=tagsFor(p);body='<h2>投稿文を選ぶ</h2><p class="lead">選ぶだけで使えます。内容は編集もできます。</p>'+pl.map(function(x,i){return '<button class="opt '+(p.post==i?'on':'')+'" data-act="ppost" data-v="'+i+'"><b>'+x[0]+'</b><br>'+esc(x[1])+'</button>'}).join('')+
+  '<label class="f">投稿文</label><textarea data-chk data-w="w-post">'+esc(pl[p.post][1])+'</textarea><div id="w-post">'+warnHtml(pl[p.post][1])+'</div><label class="f">ハッシュタグ候補（タップで選択）</label><div class="chips">'+tg.map(function(x,i){return '<span class="opt '+(i<3?'on':'')+'" data-toggle>'+esc(x)+'</span>'}).join('')+'</div><div style="margin-top:12px">'+D('投稿文をコピー','block ghost')+'</div>'}
+ if(n==6){var wc=hits(p.copy+plans(p)[p.post][1]);body='<h2>保存・書き出し</h2>'+(wc.length?'<div class="warn" role="alert"><b>表現に注意が必要です：'+wc.map(esc).join('、')+'</b><br>内容を見直してから使用してください。</div>':'')+'<div class="card pv">'+cand(p.pick,p)+'<div class="cap" style="padding:8px"><b>案'+'ABC'.charAt(p.pick)+'</b> <span class="tag">サンプル表示</span></div></div><p class="lead" style="text-align:center">'+p.type+' ／ '+p.mood+' ／ 背景：'+p.bg+' ／ '+S[0]+'</p><div class="grid c2">'+D('保存','big')+D('投稿用に書き出す','big ghost')+'</div>'}
+ return back(n>1?'promo/'+(n-1):'home',n>1?'前のステップ':'ホーム')+head('広報画像をつくる','ステップ '+n+' / 6：'+PSTEP[n-1])+'<div class="steps">'+[1,2,3,4,5,6].map(function(i){return '<i class="'+(i<=n?'on':'')+'"></i>'}).join('')+'</div>'+usageCard()+notes+body+
+ (n<6?'<a class="btn block big" style="margin-top:16px" href="#/promo/'+(n+1)+'">次へ</a>':'')};
 /* ===== router ===== */
 function route(){
  var h=(location.hash||'#/home').replace(/^#\/?/,''),p=h.split('/'),k=p[0]||'home',html=null,key=k;
@@ -221,11 +256,16 @@ document.addEventListener('click',function(e){
  else if(a=='wiz'){state.wiz.step=Math.max(1,Math.min(4,state.wiz.step+ +v));route()}
  else if(a=='pset'){state.promo[el.getAttribute('data-k')]=v;route()}
  else if(a=='ppick'){state.promo.pick=+v;route()}
+ else if(a=='photo'){state.promo.photo=+v;route()}
+ else if(a=='ppost'){state.promo.post=+v;route()}
  else if(a=='ans'){state.dq.ans.push(v);state.dq.i++;
   if(state.dq.i>=DQ.length){var c={};state.dq.ans.forEach(function(k){c[k]=(c[k]||0)+1});var best=Object.keys(c).sort(function(x,y){return c[y]-c[x]})[0];state.dq={i:0,ans:[]};location.hash='#/diag/result/'+best}else route()}
  else if(a=='dback'){state.dq.i--;state.dq.ans.pop();route()}
  else if(a=='fs'){state.fs=v;document.documentElement.setAttribute('data-fs',v);route()}
  else if(a=='quiz'){var okk=el.getAttribute('data-ok')=='1';el.classList.add(okk?'ok':'ng');el.textContent=(okk?'正解！ ':'残念… ')+el.textContent}
 });
+document.addEventListener('input',function(e){var el=e.target,f=el.getAttribute&&el.getAttribute('data-f');
+ if(f){state.promo[f]=el.value;var pv=$('#pv');if(pv)pv.innerHTML=cand(0,state.promo);if(el.hasAttribute('data-chk')){var w=$('#w-copy');if(w)w.innerHTML=warnHtml(el.value)}}
+ else if(el.hasAttribute&&el.hasAttribute('data-chk')){var w2=$('#'+el.getAttribute('data-w'));if(w2)w2.innerHTML=warnHtml(el.value)}});
 route();
 })();

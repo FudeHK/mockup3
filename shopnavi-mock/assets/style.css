@@ -74,3 +74,14 @@ svg{max-width:100%}
  main{padding:28px 32px}
  .kstep{grid-template-columns:1fr 1fr}
 }
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.g2 .cand svg,.g3 .cand svg{width:100%;height:auto;display:block}
+.cand .cap{flex-wrap:wrap}.tag.s{font-size:.65rem;padding:1px 8px}
+.warn{background:#fdeaea;border:2px solid var(--red);color:#7a1f1f;border-radius:12px;padding:10px 14px;margin:8px 0;font-size:.9rem}
+.usage{padding:12px 16px}
+.pv{max-width:420px;margin-left:auto;margin-right:auto;padding:8px}.pv svg{display:block;width:100%;height:auto}
+.paper{background:#fff;border:3px double #4a3322;max-width:560px;margin:0 auto;padding:22px 20px;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.paper-h{background:#4a3322;color:#fff;font-weight:800;font-size:1.15rem;padding:10px 14px;text-align:center}
+.paper-ol{padding-left:1.4em;margin:0 0 14px}.paper-ol li{margin-bottom:8px}
+.paper-box{border:2px dashed var(--red);border-radius:10px;padding:10px 14px}.paper-box ul{margin:6px 0 0;padding-left:1.2em}
+@media print{.mock-banner,.side,.tabs,.back,.btn,.toast{display:none!important}body{padding:0!important}}
