@@ -1,0 +1,14 @@
+# Supabase CLI 設定（ローカル開発用・最小）
+project_id = "shopnavi"
+
+[api]
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+
+[auth]
+site_url = "http://localhost:3000"
+enable_anonymous_sign_ins = true
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]

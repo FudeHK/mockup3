@@ -1,0 +1,107 @@
+/* 配色・部品は mockup3 の shopnavi-mock（assets/style.css）を流用 */
+:root{--bg:#fff8f0;--card:#fff;--pri:#e8743b;--pri-d:#b9501f;--ink:#4a3322;--sub:#7f6857;--line:#f0e0d0;--green:#4f8f60;--red:#c93a3a;--tint:#fdeee0}
+html{font-size:17px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic",Meiryo,system-ui,sans-serif;line-height:1.6;overflow-wrap:anywhere;-webkit-text-size-adjust:100%}
+a{color:inherit}
+h1{font-size:1.5rem;margin:0 0 8px}h2{font-size:1.15rem;margin:22px 0 10px}h3{font-size:1.02rem;margin:0 0 6px}
+p{margin:6px 0}
+.lead{color:var(--sub);margin:0 0 16px}
+.muted{color:var(--sub);font-size:.88rem}
+.center-msg{min-height:60vh;display:flex;align-items:center;justify-content:center;color:var(--sub)}
+.card{background:var(--card);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(120,70,30,.07)}
+.card.alert{border:3px solid var(--red);background:#fff5f5}
+.row{display:flex;gap:10px;align-items:center}.wrap{flex-wrap:wrap}.grow{flex:1;min-width:0}.between{justify-content:space-between}
+.grid{display:grid;gap:12px;grid-template-columns:1fr}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:52px;padding:10px 20px;border:2px solid var(--pri-d);background:var(--pri-d);color:#fff;border-radius:14px;font:inherit;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
+.btn.ghost{background:#fff;color:var(--pri-d)}.btn.green{background:var(--green);border-color:var(--green)}.btn.red{background:var(--red);border-color:var(--red)}
+.btn.block{width:100%}.btn.big{min-height:76px;font-size:1.25rem}.btn.small{min-height:40px;padding:6px 14px;font-size:.9rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:active:not(:disabled){transform:scale(.98)}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid #2d5b8f;outline-offset:2px}
+.tag{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.78rem;font-weight:700;background:var(--tint);color:var(--pri-d);white-space:nowrap}
+.tag.g{background:#e3f1e7;color:#2f6a40}.tag.r{background:#fbe1e1;color:#a52727}.tag.y{background:#fdf0c9;color:#7a5608}.tag.b{background:#e2ecf8;color:#2d5b8f}
+label{display:block;font-weight:700;margin:10px 0 4px}
+input[type=text],input[type=tel],input[type=password],input[type=date],select,textarea{width:100%;font:inherit;padding:12px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+textarea{min-height:84px;resize:vertical}
+.err{color:var(--red);font-weight:700}
+.ok{color:var(--green);font-weight:700}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden}
+th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;font-size:.92rem}
+th{background:var(--tint);font-size:.82rem;white-space:nowrap}
+td.nw{white-space:nowrap}
+.table-wrap{overflow-x:auto;border-radius:12px}
+
+/* シェル */
+.topbar{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 14px;background:#fff;border-bottom:1px solid var(--line)}
+.brand{display:flex;gap:8px;align-items:center;min-width:0}
+.logo{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:var(--pri-d);color:#fff;font-weight:800;font-size:.85rem}
+.store{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.body{display:flex}
+.main{flex:1;min-width:0;padding:18px 16px 110px;max-width:1000px;margin:0 auto;width:100%}
+.main.wide{max-width:none;padding:12px 16px 24px}
+.side{position:fixed;bottom:0;left:0;right:0;z-index:30;display:flex;background:#fff;border-top:1px solid var(--line)}
+.side a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:62px;font-size:.75rem;color:var(--sub);text-decoration:none}
+.side a.on{color:var(--pri-d);font-weight:800;background:var(--tint)}
+@media (min-width:900px){
+  .side{position:sticky;top:51px;align-self:flex-start;flex-direction:column;width:190px;height:calc(100vh - 51px);border-top:0;border-right:1px solid var(--line);padding:12px 8px;gap:4px}
+  .side a{flex:none;flex-direction:row;justify-content:flex-start;gap:10px;padding:0 14px;border-radius:12px;font-size:1rem;min-height:52px}
+  .main{padding-bottom:40px}
+  .grid.two{grid-template-columns:1fr 1fr}
+  .grid.three{grid-template-columns:repeat(3,1fr)}
+}
+
+/* ログイン */
+.login{max-width:520px;margin:0 auto;padding:24px 16px 40px}
+.pin-dots{display:flex;gap:10px;justify-content:center;margin:10px 0 14px}
+.pin-dots span{width:20px;height:20px;border-radius:50%;border:2px solid var(--pri-d)}
+.pin-dots span.on{background:var(--pri-d)}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.keypad button{min-height:64px;font-size:1.5rem;font-weight:800;border-radius:16px;border:2px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+.keypad button:active{background:var(--tint)}
+@media (orientation:landscape) and (min-width:900px){
+  .login{max-width:900px;display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+}
+
+/* リスト */
+.list-item{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.choice{display:flex;gap:10px;align-items:center;padding:12px;border:2px solid var(--line);border-radius:14px;margin:8px 0;background:#fff;cursor:pointer;font-weight:600}
+.choice input{width:24px;height:24px;flex:none}
+.choice.correct{border-color:var(--green);background:#eef8f1}.choice.wrong{border-color:var(--red);background:#fff1f1}
+
+/* 閲覧（1工程ずつ大きく。タブレット横向き優先） */
+.viewer{display:flex;flex-direction:column;gap:12px;min-height:calc(100vh - 80px)}
+.viewer-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.progress{height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--pri)}
+.step-card{flex:1;display:grid;gap:16px;grid-template-columns:1fr;background:#fff;border-radius:22px;padding:18px;box-shadow:0 2px 10px rgba(120,70,30,.08)}
+.step-photo{display:flex;align-items:center;justify-content:center;background:#f7efe6;border-radius:16px;min-height:180px;overflow:hidden}
+.step-photo img{max-width:100%;max-height:46vh;object-fit:contain;display:block}
+.step-no{font-size:1.1rem;font-weight:800;color:var(--pri-d)}
+.step-text{font-size:1.9rem;font-weight:800;line-height:1.45;margin:6px 0 0}
+.step-q{color:var(--sub);font-size:.95rem}
+.viewer-actions{display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"prev next" "unknown speak";gap:10px}
+.viewer-actions .btn{min-height:72px;font-size:1.15rem;white-space:nowrap;padding:10px 12px}
+.va-prev{grid-area:prev}.va-next{grid-area:next}.va-unknown{grid-area:unknown}.va-speak{grid-area:speak}
+.btn.unknown{background:#fff;color:var(--red);border-color:var(--red);font-size:1.2rem}
+.speech-note{font-size:.85rem;color:var(--sub)}
+@media (orientation:landscape) and (min-width:800px){
+  .step-card{grid-template-columns:1.05fr 1fr;align-items:center;padding:24px}
+  .step-photo img{max-height:56vh}
+  .step-text{font-size:2.3rem}
+  .viewer-actions{grid-template-columns:1fr 1.3fr 1fr 1fr;grid-template-areas:"prev unknown speak next"}
+}
+@media (orientation:landscape) and (max-height:500px){
+  .step-text{font-size:1.5rem}
+}
+
+/* 編集 */
+.step-edit{border-left:6px solid var(--pri)}
+.photo-thumb{max-width:220px;max-height:160px;border-radius:10px;display:block;margin:6px 0}
+.file-btn input{position:absolute;opacity:0;width:1px;height:1px}
+
+.toast{position:fixed;left:50%;top:64px;transform:translateX(-50%) translateY(-20px);opacity:0;pointer-events:none;background:#2f2a26;color:#fff;padding:12px 20px;border-radius:14px;font-weight:700;transition:.2s;z-index:60;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.new-flash{animation:flash 2s ease-out}
+@keyframes flash{from{background:#fff3c4}to{background:#fff}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
