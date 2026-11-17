@@ -77,7 +77,7 @@ var TABOF={};NAV.forEach(function(n){TABOF[n[0]]=n[0]});
 if(FULL){['diag','staff','promo','request','settings','onboarding','checklist','lang','quiz','praise'].forEach(function(k){TABOF[k]='more'})}
 /* ===== util ===== */
 var $=function(s){return document.querySelector(s)};
-var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
 var state={wiz:{step:1,tpl:0},dq:{i:0,ans:[]},fs:'m',promo:{type:'居酒屋',mood:'和風',use:'新メニュー',bg:'和風',photo:0,shop:SHOP.name,copy:'旬の刺身、入荷しました',hours:'17:00〜24:00',closed:'毎週水曜日',size:'sq',pick:0,post:0}};
 var toastT;
 function toast(){var t=$('#toast');t.textContent='モックアップのため操作できません';t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show')},2200)}

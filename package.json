@@ -1,0 +1,16 @@
+{
+  "name": "shopnavi-mock",
+  "private": true,
+  "description": "ShopNavi 静的モックアップ（ビルド不要）",
+  "scripts": {
+    "start": "python3 -m http.server 8080 -d shopnavi-mock",
+    "build": "node scripts/lint.js && echo 静的サイトのためビルド工程なし",
+    "lint": "node scripts/lint.js",
+    "test": "node scripts/check.js",
+    "e2e": "python3 -I tests/e2e_webapp.py",
+    "screenshots": "node scripts/screenshots.js"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

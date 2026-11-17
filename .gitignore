@@ -1,2 +1,9 @@
 screenshots/
 node_modules/
+__pycache__/
+# 秘密情報（絶対にコミットしない）
+.env
+.env.*
+!.env.example
+*.pem
+supabase/.temp/
