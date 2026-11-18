@@ -115,3 +115,30 @@ update public.store_secrets
 set admin_pin_hash = extensions.crypt('新しいPIN', extensions.gen_salt('bf', 10)), updated_at = now()
 where store_id = (select id from public.stores where code = 'demo');
 ```
+
+## v2 追加機能（ブランチ `feature/v2`・試験導入後に反映予定）
+
+試験導入（11/20〜12/1）の測定に影響しないよう、**本番の DB・Vercel には未反映**です。店舗ごとの機能フラグ（`store_features`）で切り替え、**既定は OFF**（行が無い＝OFF。v2 のテーブルが無い DB でも従来どおり動きます）。
+
+| 記号 | 機能 | 画面 | フラグ |
+|---|---|---|---|
+| A | 音声でマニュアル作成（Web Speech API・ja-JP。非対応端末はボタン無効＋理由表示）。入力方法を `input_logs` に記録し CSV に「入力方法」として出力 | マニュアル編集 | `voice_input` |
+| B | 広報画像（写真1枚＋店名・メニュー・一言 → 3案を JPEG 保存。AI 生成なし・EXIF 削除・端末の標準書体のみ・表現チェック） | `/admin/promo` | `promo_image` |
+| C | テンプレートの書き出し・取り込み（写真・店舗名・呼び名・連絡先を除く JSON） | `/admin/share` | `template_share` |
+| C | 招待リンクで新しい店を作成（7日・1回のみ。トークンはハッシュ保存、URL の # 以降に置く） | `/admin/share`・`/invite` | `invite` |
+| D | パートナー（卸・酒屋）管理画面（デモ用・架空のデータ）。集計のみ、3店舗未満の区分は非表示、店舗の同意（`partner_share`）が必要 | `/partner` | `partner_share`（店舗側） |
+| E | メニュー表の多言語化（英・中・韓。店主が確定した翻訳のみ表示）とアレルゲン（特定原材料8＋準ずるもの20。店主入力のみ・免責表示） | `/admin/menu`・`/staff/menu` | `menu_i18n` |
+| F | スタッフの自己申告プロフィール（選択式。本人が公開に同意した項目のみ管理者に表示。評価・人事判断への利用禁止を表示） | `/staff/profile`・`/admin/profiles` | `staff_profile` |
+
+- DB 変更は追加のみ：`app/supabase/migrations/20261201000000_v2_features.sql`（何度実行しても壊れない形）
+- デモ用データ（架空）：`app/supabase/seed_v2_demo.sql`（デモ店舗 `demo` のフラグ ON、架空の店舗8店、架空の卸 `demo-partner`／PIN `864209`）。**本番の試験導入店舗には実行しない**
+- テスト：`npm test`（単体・RLS。v2 分は `tests/unit/v2.test.mjs`・`tests/rls/v2.test.mjs`）、`npm run test:e2e` のあとに `npm run test:e2e:v2`（スクリーンショットは `docs/e2e-screenshots/v2-*`）
+- 機能棚卸し（旧モックとの差分）：`docs/機能棚卸し.md`
+
+フラグを ON にする（SQL Editor で実行。店舗コードと機能名を置き換え）：
+
+```sql
+insert into public.store_features (store_id, feature, enabled)
+select id, 'menu_i18n', true from public.stores where code = 'demo'
+on conflict (store_id, feature) do update set enabled = excluded.enabled, updated_at = now();
+```

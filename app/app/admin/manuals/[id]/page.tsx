@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Shell } from '@/components/Shell';
 import { useToast } from '@/components/Toast';
 import { sb, PHOTO_BUCKET } from '@/lib/supabase';
@@ -10,6 +10,9 @@ import { shrinkImage } from '@/lib/image';
 import { useSignedUrls } from '@/lib/photos';
 import { fmtDuration, fmtShort } from '@/lib/format';
 import type { Manual, Revision, Step } from '@/lib/types';
+import { useFeatures } from '@/lib/features';
+import { VoiceButton } from '@/components/VoiceInput';
+import { appendText, inputMethod, splitIntoSteps } from '@/lib/v2/voice';
 
 export default function EditPage() {
   return (
@@ -34,6 +37,15 @@ function Editor() {
   const [note, setNote] = useState('');
   const [err, setErr] = useState('');
   const urls = useSignedUrls(steps.map((s) => s.photo_path));
+  // v2-A: 工程ごとの入力方法（音声／手入力）。フラグ OFF のときは記録しない
+  const voiceOn = useFeatures().has('voice_input');
+  const methods = useRef(new Map<string, { voice: boolean; typed: boolean }>());
+  const mark = (sid: string, k: 'voice' | 'typed') => {
+    if (!voiceOn) return;
+    const m = methods.current.get(sid) ?? { voice: false, typed: false };
+    m[k] = true;
+    methods.current.set(sid, m);
+  };
 
   const load = useCallback(async () => {
     const c = sb();
@@ -131,7 +143,51 @@ function Editor() {
         return false;
       }
     }
+    await logInputMethods();
     return true;
+  };
+
+  // v2-A: 入力方法を利用ログ（input_logs）に記録。失敗しても保存は止めない
+  const logInputMethods = async () => {
+    if (!voiceOn || methods.current.size === 0) return;
+    const rows = steps
+      .map((s, i) => {
+        const m = methods.current.get(s.id);
+        const method = m ? inputMethod(m.voice, m.typed) : null;
+        return method ? { store_id: me.storeId, manual_id: id, manual_title: title.trim().slice(0, 60), step_no: i + 1, method, chars: s.body.length } : null;
+      })
+      .filter((r): r is NonNullable<typeof r> => r !== null);
+    methods.current.clear();
+    if (rows.length === 0) return;
+    try {
+      await sb().from('input_logs').insert(rows);
+    } catch {
+      /* noop */
+    }
+  };
+
+  // v2-A: まとめて話した内容を「次に」「それから」で区切り、空いている工程から順に入れる
+  const onBulkVoice = (text: string) => {
+    const parts = splitIntoSteps(text);
+    if (parts.length === 0) return;
+    setSteps((list) => {
+      const n = [...list];
+      let k = 0;
+      for (let i = 0; i < n.length && k < parts.length; i++) {
+        if (!n[i].body.trim()) {
+          n[i] = { ...n[i], body: parts[k++] };
+          mark(n[i].id, 'voice');
+        }
+      }
+      while (k < parts.length) {
+        const sid = crypto.randomUUID();
+        n.push({ id: sid, manual_id: id, store_id: me.storeId, position: n.length + 1, question: '', body: parts[k++], photo_path: null });
+        mark(sid, 'voice');
+      }
+      return n;
+    });
+    setDirty(true);
+    toast.show(`音声から${parts.length}つの工程を入れました。内容を確認してください`);
   };
 
   const onSave = async () => {
@@ -177,6 +233,14 @@ function Editor() {
         <input id="title" type="text" maxLength={60} value={title} onChange={(e) => { setTitle(e.target.value); setDirty(true); }} />
       </div>
 
+      {voiceOn && (
+        <div className="card" data-testid="voice-bulk-card">
+          <h3>🎤 まとめて音声で作る</h3>
+          <p className="muted">作業を順番に話してください。「次に」「それから」「最後に」で工程を区切ります。話した内容は端末の音声認識で文字にし、空いている工程から順に入ります。</p>
+          <VoiceButton label="🎤 まとめて話す" testId="voice-bulk" block onText={onBulkVoice} />
+        </div>
+      )}
+
       {steps.map((s, i) => (
         <div key={s.id} className="card step-edit" data-testid="step-edit">
           <div className="row between wrap">
@@ -190,7 +254,12 @@ function Editor() {
           <label htmlFor={`q-${s.id}`}>質問</label>
           <input id={`q-${s.id}`} type="text" value={s.question} placeholder="（任意）例：最初に何をしますか？" onChange={(e) => patch(s.id, { question: e.target.value })} />
           <label htmlFor={`b-${s.id}`}>答え（一言） <span className="muted">{s.body.length}/200</span></label>
-          <textarea id={`b-${s.id}`} maxLength={200} value={s.body} placeholder="例：裏口の鍵を開け、照明をつける" onChange={(e) => patch(s.id, { body: e.target.value })} />
+          <textarea id={`b-${s.id}`} maxLength={200} value={s.body} placeholder="例：裏口の鍵を開け、照明をつける" onChange={(e) => { mark(s.id, 'typed'); patch(s.id, { body: e.target.value }); }} />
+          {voiceOn && (
+            <div style={{ marginTop: 6 }}>
+              <VoiceButton testId="voice-step" onText={(t) => { mark(s.id, 'voice'); setSteps((list) => list.map((x) => (x.id === s.id ? { ...x, body: appendText(x.body, t) } : x))); setDirty(true); }} />
+            </div>
+          )}
           <div className="row wrap" style={{ marginTop: 8 }}>
             {s.photo_path && urls[s.photo_path] && <img className="photo-thumb" src={urls[s.photo_path]} alt={`工程${i + 1}の写真`} />}
             <label className="btn ghost small file-btn" style={{ position: 'relative', margin: 0 }}>

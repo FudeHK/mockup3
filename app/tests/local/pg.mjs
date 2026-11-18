@@ -64,6 +64,9 @@ export function resetDb() {
     psql(null, { file: path.join(migDir, f), db: 'shopnavi' });
   }
   psql(null, { file: path.join(appRoot, 'supabase/seed.sql'), db: 'shopnavi' });
+  // v2 デモ用データ（架空）。本番には適用しない
+  const v2 = path.join(appRoot, 'supabase/seed_v2_demo.sql');
+  if (fs.existsSync(v2)) psql(null, { file: v2, db: 'shopnavi' });
 }
 
 export function stopDb() {

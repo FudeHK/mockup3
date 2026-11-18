@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Shell } from '@/components/Shell';
 import { sb } from '@/lib/supabase';
 import { useSession } from '@/lib/session';
+import { useFeatures } from '@/lib/features';
 import { fmtShort } from '@/lib/format';
 
 type Row = { id: string; title: string; version: number; published_at: string; status: string };
@@ -45,6 +46,7 @@ function StaffList() {
   }, [me?.aliasId]);
 
   const pending = items?.filter((i) => i.reconfirm).length ?? 0;
+  const features = useFeatures();
 
   return (
     <>
@@ -58,6 +60,12 @@ function StaffList() {
       )}
       {items === null && <p className="muted">読み込み中…</p>}
       {items?.length === 0 && <p className="muted">公開されたマニュアルはまだありません。</p>}
+      {(features.has('menu_i18n') || features.has('staff_profile')) && (
+        <div className="row wrap" style={{ marginBottom: 12 }}>
+          {features.has('menu_i18n') && <Link href="/staff/menu" className="btn ghost small">🍽 メニュー表 / Menu</Link>}
+          {features.has('staff_profile') && <Link href="/staff/profile" className="btn ghost small" data-testid="link-profile">🙂 わたしのプロフィール</Link>}
+        </div>
+      )}
       <div className="grid two">
         {items?.map((m) => (
           <Link key={m.id} href={`/staff/manuals/${m.id}`} className={`card list-item ${m.reconfirm ? 'alert' : ''}`} style={{ textDecoration: 'none' }} data-testid="staff-manual">

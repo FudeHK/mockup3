@@ -105,3 +105,19 @@ td.nw{white-space:nowrap}
 .new-flash{animation:flash 2s ease-out}
 @keyframes flash{from{background:#fff3c4}to{background:#fff}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* v2 */
+.promo-canvas{width:100%;height:auto;max-height:420px;object-fit:contain;border-radius:10px;background:#f7efe6;display:block}
+.voice-note{display:block;margin-top:4px}
+.allergen{display:inline-flex;align-items:center;gap:4px;margin:2px 6px 2px 0;font-size:.85rem;font-weight:700}
+.allergen i{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;padding:0 4px;border-radius:99px;font-style:normal;font-size:.72rem;font-weight:800}
+.allergen.m i{background:#c93a3a;color:#fff}
+.allergen.r i{background:#fff;color:#b9501f;border:2px solid #b9501f}
+.disclaimer{border:2px solid #c93a3a;background:#fff5f5;border-radius:12px;padding:10px 12px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:2px solid var(--line);border-radius:99px;background:#fff;cursor:pointer;font-weight:600;min-height:44px}
+.chip input{width:20px;height:20px}
+.chip.on{border-color:var(--pri-d);background:var(--tint)}
+.fake-banner{background:#2d5b8f;color:#fff;font-weight:800;text-align:center;padding:8px;border-radius:12px;margin-bottom:12px}
+.stat{font-size:2rem;font-weight:800;color:var(--pri-d)}
+.menu-board .item{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
